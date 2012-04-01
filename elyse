@@ -109,8 +109,6 @@ class ExtendedDict(dict):
 
 
 class CodeHtmlFormatter(HtmlFormatter):
-    # encoding = 'utf-8'
-
     def wrap(self, source, outfile):
         return self._wrap_code(source)
 
@@ -122,9 +120,6 @@ class CodeHtmlFormatter(HtmlFormatter):
 
 
 class ElyseRenderer(HtmlRenderer, SmartyPants):
-
-    _toc_ids = {}
-
     def _render_str(self, text):
         return text
 
@@ -310,7 +305,7 @@ class Elyse(object):
                     archive=self._data.archive,
                     tags=self._data.tags)
 
-            # 'index' is a reserved name
+            # Check if files need to placed in the root
             if name in self.config.root:
                 name = '%s%s' % (name, ext)
                 dest_fn = path.join(dest, name)
@@ -426,5 +421,3 @@ def main(args):
 
 if __name__ == '__main__':
     main(sys.argv[1:])
-
-    # print path.abspath('../src')
