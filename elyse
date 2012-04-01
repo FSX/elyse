@@ -138,75 +138,6 @@ class ElyseRenderer(HtmlRenderer, SmartyPants):
         formatter = CodeHtmlFormatter()
         return highlight(text, lexer, formatter)
 
-    # def header(self, text, level):
-    #     if self.flags & HTML_TOC:
-    #         identifier = slugify(text)
-
-    #         if identifier in self._toc_ids:
-    #             self._toc_ids[identifier] += 1
-    #             identifier = '{0}-{1}'.format(identifier, self._toc_ids[identifier])
-    #         else:
-    #             self._toc_ids[identifier] = 1
-
-    #         return u'<h{0} id="toc-{1}">{2}</h{0}>'.format(level, identifier, text)
-    #     else:
-    #         return u'<h{0}>{1}</h{0}>\n'.format(level, text)
-
-    def doc_footer(self):
-        # Reset TOC IDs. A TOC is only used on pages (not posts) and there is
-        # only one page on a page. Not multiple, like a listing of posts. So
-        # There is no chance in conflicting IDs.
-        # self._toc_ids = {}
-        return ''
-
-
-class ElyseTocRenderer(HtmlTocRenderer, SmartyPants):
-
-    # def _render_str(self, text):
-    #     return text
-
-    # def preprocess(self, document):
-    #     return self._render_str(document)
-
-    _level = 0
-    _offset = 0
-
-    # def link(self, link, title, content):
-    #     return content
-
-    # def header(self, text, level):
-    #     html = ''
-
-    #     if self._level == 0:
-    #         self._offset = level - 1
-    #     level = level - self._offset
-
-    #     if level > self._level:
-    #         while level > self._level:
-    #             html += '<ul>\n<li>\n'
-    #             self._level += 1
-    #     elif level < self._level:
-    #         html += '</li>\n'
-    #         while level < self._level:
-    #             html += '</ul>\n</li>\n'
-    #             self._level -= 1
-    #         html += '<li>\n'
-    #     else:
-    #         html += '</li>\n<li>\n'
-
-    #     html += '<span class="%d">%s</span>' % (self._level, h.escape_html(text))
-
-    #     return html
-
-    # def doc_footer(self):
-    #     html = ''
-
-    #     while self._level > 0:
-    #         html += '</li>\n</ul>\n'
-    #         self._level -= 1
-
-    #     return html
-
 
 class Elyse(object):
 
@@ -257,7 +188,7 @@ class Elyse(object):
             flags |= HTML_TOC
 
         renderer_toc = ElyseRenderer(flags)
-        self._toc = Markdown(ElyseTocRenderer(), extensions)
+        self._toc = Markdown(HtmlTocRenderer(), extensions)
         self._markdown_toc = Markdown(renderer_toc, extensions)
 
         # Default template variables
