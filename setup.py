@@ -16,7 +16,7 @@ setup(
     long_description=open('README.rst').read(),
     scripts=['elyse'],
     install_requires=[
-        'pyyaml'
+        'pyyaml',
         'tornado',
         'houdini.py',
         'misaka',

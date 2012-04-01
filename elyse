@@ -307,6 +307,9 @@ class Elyse(object):
 
             # Check if files need to placed in the root
             if name in self.config.root:
+                if ext == '.md':
+                    ext = '.html'
+
                 name = '%s%s' % (name, ext)
                 dest_fn = path.join(dest, name)
             else:
