@@ -238,7 +238,7 @@ class Elyse(object):
 
             # Write
             os.makedirs(dest_dir)
-            with codecs.open(dest_fn, 'wb', 'utf-8') as fd:
+            with codecs.open(dest_fn, 'w', 'utf-8') as fd:
                 fd.write(output)
 
             # Add to posts
@@ -312,7 +312,7 @@ class Elyse(object):
                 dest_fn = path.join(dest, name, 'index.html')
 
             # Write page
-            with codecs.open(dest_fn, 'wb', 'utf-8') as fd:
+            with codecs.open(dest_fn, 'w', 'utf-8') as fd:
                 fd.write(output)
 
     def _tags(self):
@@ -325,7 +325,7 @@ class Elyse(object):
         for tag, data in self._data.tags.items():
             output = self._render_tpl(self.config.tag_layout, tag=data)
             os.makedirs(path.join(dest, tag))
-            with codecs.open(path.join(dest, tag, 'index.html'), 'wb', 'utf-8') as fd:
+            with codecs.open(path.join(dest, tag, 'index.html'), 'w', 'utf-8') as fd:
                 fd.write(output)
 
     def _archive(self):
@@ -337,7 +337,7 @@ class Elyse(object):
             archive=self._data.archive)
 
         os.makedirs(path.join(self.opts['dest'], 'archive'))
-        with codecs.open(path.join(self.opts['dest'], 'archive', 'index.html'), 'wb', 'utf-8') as fd:
+        with codecs.open(path.join(self.opts['dest'], 'archive', 'index.html'), 'w', 'utf-8') as fd:
             fd.write(output)
 
     def _pre_scripts(self):
