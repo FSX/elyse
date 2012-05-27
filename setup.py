@@ -8,7 +8,7 @@ except ImportError:
 
 setup(
     name='elyse',
-    version='0.1.0',
+    version='0.1.1',
     description='A simple static website generator.',
     author='Frank Smit',
     author_email='frank@61924.nl',

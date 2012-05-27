@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import shutil
+import codecs
 import datetime
 import subprocess
 from os import path
@@ -141,7 +142,7 @@ class Elyse(object):
         config_path = path.join(self.opts['src'], 'config.yml')
         if path.exists(config_path):
             print('>> Load config.yml')
-            with open(config_path, 'r') as fd:
+            with codecs.open(config_path, 'r', 'utf-8') as fd:
                 self.config = parse_yaml(fd.read())
         else:
             print('>> config.yml not found')
@@ -215,7 +216,7 @@ class Elyse(object):
             dest_fn = path.join(dest_dir, 'index.html')
 
             # Render post
-            with open(path.join(src, fn), 'r') as fd:
+            with codecs.open(path.join(src, fn), 'r', 'utf-8') as fd:
                 raw_data = fd.read()
 
             data = split_frontmatter(raw_data)
@@ -237,7 +238,7 @@ class Elyse(object):
 
             # Write
             os.makedirs(dest_dir)
-            with open(dest_fn, 'w') as fd:
+            with codecs.open(dest_fn, 'wb', 'utf-8') as fd:
                 fd.write(output)
 
             # Add to posts
@@ -269,7 +270,7 @@ class Elyse(object):
 
         for fn in list_files(src):
             name, ext = path.splitext(fn.replace(src, '', 1).strip('/\\'))
-            with open(fn, 'r') as fd:
+            with codecs.open(fn, 'r', 'utf-8') as fd:
                 raw_data = fd.read()
 
             if ext == '.md':
@@ -311,7 +312,7 @@ class Elyse(object):
                 dest_fn = path.join(dest, name, 'index.html')
 
             # Write page
-            with open(dest_fn, 'w') as fd:
+            with codecs.open(dest_fn, 'wb', 'utf-8') as fd:
                 fd.write(output)
 
     def _tags(self):
@@ -324,7 +325,7 @@ class Elyse(object):
         for tag, data in self._data.tags.items():
             output = self._render_tpl(self.config.tag_layout, tag=data)
             os.makedirs(path.join(dest, tag))
-            with open(path.join(dest, tag, 'index.html'), 'w') as fd:
+            with codecs.open(path.join(dest, tag, 'index.html'), 'wb', 'utf-8') as fd:
                 fd.write(output)
 
     def _archive(self):
@@ -336,7 +337,7 @@ class Elyse(object):
             archive=self._data.archive)
 
         os.makedirs(path.join(self.opts['dest'], 'archive'))
-        with open(path.join(self.opts['dest'], 'archive', 'index.html'), 'w') as fd:
+        with codecs.open(path.join(self.opts['dest'], 'archive', 'index.html'), 'wb', 'utf-8') as fd:
             fd.write(output)
 
     def _pre_scripts(self):
@@ -380,13 +381,13 @@ class Elyse(object):
         defaults.update(kwargs)
 
         t = template.Template(template_string, loader=self._loader, autoescape=None)
-        return t.generate(**defaults)
+        return str(t.generate(**defaults))
 
     def _render_tpl(self, template, **kwargs):
         defaults = self._defaults
         defaults.update(kwargs)
 
-        return self._loader.load(template).generate(**defaults)
+        return str(self._loader.load(template).generate(**defaults))
 
     def generate(self):
         # Cleanup before writing
