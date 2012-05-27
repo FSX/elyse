@@ -4,7 +4,6 @@ import os
 import re
 import sys
 import shutil
-import logging
 import datetime
 import subprocess
 from os import path
@@ -59,10 +58,6 @@ misaka_html_flags = {
     'use_xhtml': HTML_USE_XHTML,
     'escape': HTML_ESCAPE
 }
-
-
-logger = logging.getLogger('elyse')
-logger.addHandler(logging.StreamHandler())
 
 
 def slugify(str):
@@ -142,17 +137,14 @@ class Elyse(object):
         self.opts['src'] = path.abspath(opts['src'])
         self.opts['dest'] = path.abspath(opts['dest'])
 
-        # INFO, WARNING, ERROR, CRITICAL
-        logger.setLevel(logging.INFO)
-
         # Check for configuration file
         config_path = path.join(self.opts['src'], 'config.yml')
         if path.exists(config_path):
-            logger.info('>> Load config.yml')
+            print('>> Load config.yml')
             with open(config_path, 'r') as fd:
                 self.config = parse_yaml(fd.read())
         else:
-            logger.info('>> config.yml not found')
+            print('>> config.yml not found')
 
         # Data
         self._data = ExtendedDict({
@@ -202,7 +194,7 @@ class Elyse(object):
         if not path.exists(src):
             return
 
-        logger.info('>> Assets')
+        print('>> Assets')
         shutil.copytree(src, dest)
 
     def _posts(self):
@@ -211,7 +203,7 @@ class Elyse(object):
         if not path.exists(src):
             return
 
-        logger.info('>> Posts')
+        print('>> Posts')
 
         for fn in reversed(sorted(os.listdir(src))):
             # Match: year-month-day-title.md
@@ -228,7 +220,7 @@ class Elyse(object):
 
             data = split_frontmatter(raw_data)
             if data is None:
-                logger.info('.. Invalid post: %s' % path.join(src, fn))
+                print('.. Invalid post: %s' % path.join(src, fn))
                 continue
 
             post, content = data
@@ -273,7 +265,7 @@ class Elyse(object):
         if not path.exists(src):
             return
 
-        logger.info('>> Pages')
+        print('>> Pages')
 
         for fn in list_files(src):
             name, ext = path.splitext(fn.replace(src, '', 1).strip('/\\'))
@@ -283,12 +275,12 @@ class Elyse(object):
             if ext == '.md':
                 data = split_frontmatter(raw_data)
                 if data is None:
-                    logger.info('.. Invalid page: %s%s' % (name, ext))
+                    print('.. Invalid page: %s%s' % (name, ext))
                     continue
 
                 page, content = data
                 if 'layout' not in page:
-                    logger.info('.. No layout specified: %s%s' % (name, ext))
+                    print('.. No layout specified: %s%s' % (name, ext))
                     continue
 
                 if page.toc is True:
@@ -326,7 +318,7 @@ class Elyse(object):
         if not self._data.tags or 'tag_layout' not in self.config:
             return
 
-        logger.info('>> Tags')
+        print('>> Tags')
         dest = path.join(self.opts['dest'], 'tags')
 
         for tag, data in self._data.tags.items():
@@ -339,7 +331,7 @@ class Elyse(object):
         if 'archive_layout' not in self.config:
             return
 
-        logger.info('>> Archive')
+        print('>> Archive')
         output = self._render_tpl(self.config.archive_layout,
             archive=self._data.archive)
 
@@ -351,7 +343,7 @@ class Elyse(object):
         if 'pre_scripts' not in self.config:
             return
 
-        logger.info('>> Pre-scripts')
+        print('>> Pre-scripts')
         for script in self.config.pre_scripts:
             subprocess.Popen(path.join(self.opts['src'], 'scripts', script),
                 cwd=self.opts['dest'], shell=True)
@@ -360,7 +352,7 @@ class Elyse(object):
         if 'post_scripts' not in self.config:
             return
 
-        logger.info('>> Post-scripts')
+        print('>> Post-scripts')
         for script in self.config.post_scripts:
             subprocess.Popen(path.join(self.opts['src'], 'scripts', script),
                 cwd=self.opts['dest'], shell=True)
