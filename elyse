@@ -60,9 +60,13 @@ misaka_html_flags = {
 }
 
 
-def slugify(str):
-    str = unidecode.unidecode(str).lower()
-    return re.sub(r'\W+','-',str)
+RE_NON_WORD = re.compile(r'\W+')
+
+def slugify(s):
+    if '/' in s:
+        return '/'.join(map(slugify, s.split('/')))
+    s = unidecode.unidecode(s).lower()
+    return RE_NON_WORD.sub('-', s)
 
 
 def list_files(dir_path):
@@ -114,12 +118,25 @@ class CodeHtmlFormatter(HtmlFormatter):
         yield 0, '</code></pre>'
 
 
+RE_WIKILINK = re.compile(r'(?<!\\)\[\[(.*?)(?:\s*\|\s*(.*?))?\]\]')
+
 class ElyseRenderer(HtmlRenderer, SmartyPants):
+    elyse = None
+
     def _render_str(self, text):
         return text
 
     def preprocess(self, document):
         return self._render_str(document)
+
+    def _make_wikilink(self, match):
+        title, ident = match.groups()
+        if not title:
+            return 'NO TITLE'
+        return '<a href="%s">%s</a>' % (self.elyse._get_url(ident or title), title)
+
+    def postprocess(self, document):
+        return RE_WIKILINK.sub(self._make_wikilink, document)
 
     def block_code(self, text, lang):
         if not lang:
@@ -168,6 +185,7 @@ class Elyse(object):
                 flags |= misaka_html_flags[name]
 
         renderer = ElyseRenderer(flags)
+        renderer.elyse = self
         renderer._render_str = self._render_str
         self._markdown = Markdown(renderer, extensions)
 
@@ -175,6 +193,7 @@ class Elyse(object):
             flags |= HTML_TOC
 
         renderer_toc = ElyseRenderer(flags)
+        renderer_toc.elyse = self
         renderer_toc._render_str = self._render_str
         self._toc = Markdown(HtmlTocRenderer(), extensions)
         self._markdown_toc = Markdown(renderer_toc, extensions)
@@ -182,8 +201,8 @@ class Elyse(object):
         # Default template variables
         self._defaults = {
             'site': self.config,
-            'get_url': self._get_url,
-            'get_asset': self._get_asset,
+            'url': self._get_url,
+            'asset': self._get_asset,
             'markdown': self._render_md,
             'date': format_date
         }
@@ -207,11 +226,12 @@ class Elyse(object):
 
         for fn in reversed(sorted(os.listdir(src))):
             # Match: year-month-day-title.md
-            match = re.match(r'([0-9]{4})-([0-9]{2})-([0-9]{2})\-(.*?)\.md', fn)
+            match = re.match(r'([0-9]{4})-([0-9]{2})-([0-9]{2})\s+(.*?)\.md', fn)
             if not match:
                 continue
+            year, month, day, title = match.groups()
 
-            dest_dir = path.join(dest, *match.groups())
+            dest_dir = path.join(dest, year, month, day, slugify(title))
             dest_fn = path.join(dest_dir, 'index.html')
 
             # Render post
@@ -269,7 +289,7 @@ class Elyse(object):
 
         for fn in list_files(src):
             name, ext = path.splitext(fn.replace(src, '', 1).strip('/\\'))
-            name = '/'.join(map(slugify, name.split('/')))
+            name = slugify(name)
 
             with open(fn, 'r') as fd:
                 raw_data = fd.read()
@@ -360,10 +380,10 @@ class Elyse(object):
                 cwd=self.opts['dest'], shell=True)
 
     def _get_asset(self, path):
-        return self.config.base_url + '/assets' + path
+        return '%s/assets/%s' % (self.config.base_url, path)
 
     def _get_url(self, path=''):
-        return '%s/%s' % (self.config.base_url, path)
+        return '%s/%s' % (self.config.base_url, slugify(path))
 
     def _render_md(self, data):
         return self._markdown.render(data)
