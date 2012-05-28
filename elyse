@@ -413,7 +413,12 @@ class Elyse(object):
     def generate(self):
         # Cleanup before writing
         if path.exists(self.opts['dest']):
-            shutil.rmtree(self.opts['dest'])
+            for p in os.listdir(self.opts['dest']):
+                p = path.join(self.opts['dest'], p)
+                if path.isdir(p):
+                    shutil.rmtree(p)
+                else:
+                    os.remove(p)
 
         # Generate~
         self._pre_scripts()
