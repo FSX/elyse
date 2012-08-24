@@ -250,7 +250,7 @@ class Elyse(object):
             # Last modification date of the post
             post.mdate = datetime.datetime.fromtimestamp(os.stat(path.join(src, fn)).st_mtime)
 
-            post.url = '/%s/' % '/'.join(match.groups())
+            post.url = '%s' % '/'.join(match.groups())
             post.date = datetime.date(*[int(n) for n in match.groups()[:-1]])
             post.content = self._render_md(content)
             output = self._render_tpl(post.layout, post=post)
