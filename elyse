@@ -21,7 +21,7 @@ import houdini as h
 from tornado import template
 from misaka import Markdown, HtmlRenderer, HtmlTocRenderer, SmartyPants, \
     EXT_NO_INTRA_EMPHASIS, EXT_TABLES, EXT_FENCED_CODE, EXT_AUTOLINK, \
-    EXT_STRIKETHROUGH, EXT_LAX_HTML_BLOCKS, EXT_SPACE_HEADERS, \
+    EXT_STRIKETHROUGH, EXT_LAX_SPACING, EXT_SPACE_HEADERS, \
     EXT_SUPERSCRIPT, \
     HTML_SKIP_HTML, HTML_SKIP_STYLE, HTML_SKIP_IMAGES, HTML_SKIP_LINKS, \
     HTML_EXPAND_TABS, HTML_SAFELINK, HTML_TOC, HTML_HARD_WRAP, \
@@ -41,7 +41,7 @@ misaka_extensions = {
     'fenced_code': EXT_FENCED_CODE,
     'autolink': EXT_AUTOLINK,
     'strikethrough': EXT_STRIKETHROUGH,
-    'lax_html_blocks': EXT_LAX_HTML_BLOCKS,
+    'lax_spacing': EXT_LAX_SPACING,
     'space_headers': EXT_SPACE_HEADERS,
     'superscript': EXT_SUPERSCRIPT
 }
@@ -127,6 +127,7 @@ class ElyseRenderer(HtmlRenderer, SmartyPants):
         return text
 
     def preprocess(self, document):
+        document = super().preprocess(document)
         return self._render_str(document)
 
     def _make_wikilink(self, match):
@@ -136,6 +137,7 @@ class ElyseRenderer(HtmlRenderer, SmartyPants):
         return '<a href="%s">%s</a>' % (self.elyse._get_url(ident or title), title)
 
     def postprocess(self, document):
+        document = super().postprocess(document)
         return RE_WIKILINK.sub(self._make_wikilink, document)
 
     def block_code(self, text, lang):
